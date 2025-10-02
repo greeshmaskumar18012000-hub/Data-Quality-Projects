@@ -1,0 +1,17 @@
+# data qualityb check; Missing or future txn_timestamp
+#(dimension:Completeness, Validity, Timeliness)
+
+CREATE TABLE Upi_dq_Misng_or_futr_txn_timestamp_02 AS
+SELECT *
+FROM (
+    SELECT 
+        transaction_id, 
+        txn_timestamp,
+        CASE 
+            WHEN txn_timestamp IS NULL THEN 'fallout'
+            WHEN txn_timestamp > CURRENT_TIMESTAMP THEN 'fallout'
+            ELSE 'not'
+        END AS error_chk
+    FROM upi_transactions_100000
+) AS sub
+WHERE error_chk = 'fallout';
