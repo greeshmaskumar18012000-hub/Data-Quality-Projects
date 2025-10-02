@@ -1,0 +1,15 @@
+#DQ Check 1: Duplicate Transaction ID 
+#(Dimension; Uniqueness, Integrity)
+
+CREATE TABLE upi_duplicate_trn_id_chk AS
+WITH table_1 AS 
+( SELECT transaction_id, 
+         COUNT() AS cnt 
+FROM upi_transactions_100000 
+GROUP BY transaction_id 
+HAVING COUNT() > 1 ),
+table_2 AS 
+( SELECT transaction_id, 
+         cnt,
+         CASE WHEN cnt > 1 THEN 'fallout' ELSE 'not' END AS error_chk FROM table_1 )
+SELECT * FROM table_2 WHERE error_chk = 'fallout';
