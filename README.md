@@ -21,3 +21,45 @@ This project implements a scalable, SQL-based data quality framework to:
 * Score data quality per transaction and batch
 * Provide scripts for identifying and optionally remediating issues
 * The framework is applicable across multiple industries processing UPI payments and aligns with enterprise-grade data governance, fraud   mitigation, and BI practices.
+
+
+About data
+
+Table Name; upi_transactions_100000.csv
+Columns; "transaction_id",
+    "sender_vpa",
+    "receiver_vpa",
+    "amount",
+    "txn_status",
+    "txn_timestamp",
+    "settlement_date",
+    "utr_reference",
+    "latitude",
+    "longitude"
+
+
+
+DQ Check 1: Duplicate Transaction ID
+(Dimension; Uniqueness, Integrity)
+
+
+CREATE TABLE upi_duplicate_trn_id_chk AS
+WITH table_1 AS (
+    SELECT transaction_id,
+           COUNT(*) AS cnt
+    FROM upi_transactions_100000
+    GROUP BY transaction_id
+    HAVING COUNT(*) > 1
+),
+table_2 AS (
+    SELECT transaction_id,
+           cnt,
+           CASE 
+               WHEN cnt > 1 THEN 'fallout'
+               ELSE 'not'
+           END AS error_chk
+    FROM table_1
+)
+SELECT *
+FROM table_2
+WHERE error_chk = 'fallout';
